@@ -15,6 +15,7 @@
  */
 
 #include "config.h"
+#include <stdio.h>
 
 #if !defined(__KERNEL__)
 #   if defined(HAVE_ENDIAN_H)
@@ -86,8 +87,8 @@ static int const rgb_weight[] =
 /* List of glyphs */
 static uint32_t ascii_glyphs[] =
 {
-    // ' ', '.', ':', ';', 't', '%', 'S', 'X', '@', '8', '?'
-    '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'
+    ' ', '.', ':', ';', 't', '%', 'S', 'X', '@', '8', '?'
+    // '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'
 };
 
 static uint32_t shades_glyphs[] =
@@ -1183,9 +1184,8 @@ int caca_dither_bitmap(caca_canvas_t *cv, int x, int y, int w, int h,
         }
 
         /* Now output the character */
+		// printf("%d, %d, %d, %d\r\n", x, y, w, h); // HERE TIMO 
         caca_set_color_ansi(cv, outfg, outbg);
-		if (x == 5)
-			outch = '?';
         caca_put_char(cv, x, y, outch);
 
         d->increment_dither();
