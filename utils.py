@@ -41,8 +41,8 @@ def collect_sfx() -> None:
 def start_sfx() -> None:
     Popen(['paplay', './assets/sfx/start.mp3'])
 
-def show_matrix(term_dev: str) -> None:
-    Popen(['sh', '-c', '2>/dev/null tmatrix 1>"' + term_dev + '"'])
+def show_matrix() -> None:
+    Popen(['tmatrix'])
 
 def found_hands() -> bool:
     capture: VideoCapture = cv2.VideoCapture(0)

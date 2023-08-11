@@ -7,15 +7,12 @@ from typing import NoReturn
 from utils import *
 
 def start_game() -> int:
-    proc = Popen(['./game.py'])
+    proc = Popen(['./start_game.sh'])
     proc.communicate()
     return proc.returncode
 
 def main() -> NoReturn:
-    if len(sys.argv) != 2:
-        print(f'Usage: {sys.argv[0]} TERMINAL_DEVICE')
-        sys.exit(1)
-    show_matrix(sys.argv[1])
+    show_matrix()
     while True:
         if found_hands():
             start_game()
