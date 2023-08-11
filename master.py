@@ -38,7 +38,7 @@ def main() -> NoReturn:
     while True:
         if found_hands():
             start_game()
-        sleep(2)
+        sleep(1)
 
 if __name__ == '__main__':
     main()
