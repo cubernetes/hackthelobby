@@ -4,11 +4,12 @@ from enum import Enum
 from subprocess import Popen
 from typing import Generator
 from types import ModuleType
+import threading
 
 import numpy as np
 import mediapipe as mp
 import cv2
-from cv2 import VideoCapture
+from playsound import playsound
 
 mp_hands = mp.solutions.hands
 mp_draw: ModuleType = mp.solutions.drawing_utils
@@ -40,22 +41,23 @@ def save_score(score: int) -> None:
     with open('./.score', 'w') as score_file:
         score_file.write(str(score))
 
-def start_game_sfx() -> Popen:
-    Popen(['paplay', './assets/sound/start.mp3']).communicate()
+def start_game_sfx() -> None:
+    playsound('./assets/sound/start.mp3')
     time.sleep(.5)
-    return Popen(['paplay', './assets/sound/background_music.mp3'])
+    threading.Thread(target=playsound, args=('./assets/sound/background_music.mp3',), daemon=True).start()
 
 def collect_sfx() -> None:
-    Popen(['paplay', './assets/sound/collect.mp3'])
+    pass
+    threading.Thread(target=playsound, args=('./assets/sound/collect.mp3',), daemon=True).start()
 
 def lost_sfx() -> None:
-    Popen(['paplay', './assets/sound/lost.mp3']).communicate()
+    playsound('./assets/sound/lost.mp3')
 
 def show_matrix() -> None:
     Popen(['tmatrix'])
 
 def initiate_rick() -> None:
-    Popen(['paplay', './assets/sound/rick.mp3'])
+    threading.Thread(target=playsound, args=('./assets/sound/rick.mp3',), daemon=True).start()
     cap = cv2.VideoCapture('./assets/video/rick2.mp4')
     fps: int = int(cap.get(cv2.CAP_PROP_FPS))
     desired_delay: float = 1 / fps
@@ -73,7 +75,7 @@ def initiate_rick() -> None:
 
 
 def found_hands() -> bool:
-    capture: VideoCapture = cv2.VideoCapture(0)
+    capture: cv2.VideoCapture = cv2.VideoCapture(0)
     hands = mp_hands.Hands(max_num_hands=1)
     success, frame = capture.read()
     if not success:

@@ -22,8 +22,6 @@ def get_42_img(
     if len(img.shape) in [1, 2]:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-    img = cv2.flip(img, 1)
-
     img_height, img_width = img.shape[:2]
     img = img[
         margin_top:img_height-margin_bottom,
@@ -70,7 +68,7 @@ def add_directional_triangle(
 
     # normalize
     norm = np.linalg.norm(dir_vector)
-    dir_vector /= norm
+    dir_vector /= (norm or 1)
 
     # TODO: Fix type issue
     side_len *= norm / 15
@@ -96,6 +94,8 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
     if to_stdout:
         sys.stdout.buffer.write(frame.tobytes())
     else:
+        cv2.namedWindow("Image", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("Image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.imshow("Image", frame)
         cv2.waitKey(1)
 
@@ -103,7 +103,7 @@ def main() -> int:
     music = start_game_sfx()
 
     capture: cv2.VideoCapture = cv2.VideoCapture(0)
-    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=1)
+    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=2)
     collected_42: bool = True
     noise_42img: int = 5
     img42_x: int = -img42_side_len - 1 - noise_42img
@@ -114,7 +114,7 @@ def main() -> int:
     finger_y: int = -1
     no_collect_ratio = 0
     no_finger_ratio = 0
-    timer = 100
+    timer = 1000
 
     i: int = 0
     while True:
@@ -124,6 +124,7 @@ def main() -> int:
         if not success:
             continue
 
+        frame = cv2.flip(frame, 1)
         ratio = max(no_finger_ratio, no_collect_ratio)
         frame = cv2.addWeighted(frame, 1 - ratio, np.ones(frame.shape, dtype=frame.dtype), ratio, 0)
         if i > 30:
