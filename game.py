@@ -2,6 +2,7 @@
 
 import sys
 import random
+from time import sleep
 from enum import Enum
 from typing import NoReturn, Generator
 from types import ModuleType
@@ -120,7 +121,7 @@ def add_directional_triangle(
 def get_finger_positions(
     frame: np.ndarray,
     hands: mp.solutions.hands.Hands,
-    add_landmarks: bool,
+    add_landmarks: bool=False,
 ) -> Generator[list[tuple[int, int, int]], None, None]:
     height, width = frame.shape[:2]
 
@@ -148,8 +149,23 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
 def collect_sfx() -> None:
     Popen(['paplay', './assets/sfx/collect.mp3'])
 
-def main() -> NoReturn:
+def start_sfx() -> None:
     Popen(['paplay', './assets/sfx/start.mp3'])
+
+def show_matrix(term_dev: str) -> None:
+    Popen(['sh', '-c', '2>/dev/null tmatrix 1>"' + term_dev + '"'])
+
+def found_hands() -> bool:
+    capture: VideoCapture = cv2.VideoCapture(0)
+    hands = mp_hands.Hands(max_num_hands=1)
+    success, frame = capture.read()
+    if not success:
+        return False
+
+    return list(get_finger_positions(frame, hands)) != []
+
+def game_loop() -> int:
+    start_sfx()
 
     capture: VideoCapture = cv2.VideoCapture(0)
     hands = mp_hands.Hands(max_num_hands=2)
@@ -197,6 +213,16 @@ def main() -> NoReturn:
                         collect_sfx()
         show_frame(frame, to_stdout=(not sys.stdout.isatty()))
         i += 1
+
+def main() -> NoReturn:
+    if len(sys.argv) != 2:
+        print(f'Usage: {sys.argv[0]} TERMINAL_DEVICE')
+        sys.exit(1)
+    show_matrix(sys.argv[1])
+    while True:
+        if found_hands():
+            game_loop()
+        sleep(1)
 
 if __name__ == '__main__':
     main()
