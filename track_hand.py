@@ -69,7 +69,7 @@ mp_draw: ModuleType = mp.solutions.drawing_utils
 
 img42_side_len = 70
 img42: np.ndarray = get_42_img(
-    "./42.png",
+    "./assets/img/42.png",
     margin_top    = 100 + 20,
     margin_bottom = 100 + 20,
     margin_left   = 100,
@@ -146,10 +146,10 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
         cv2.waitKey(1)
 
 def collect_sfx() -> None:
-    Popen(['paplay', './sfx/collect.mp3'])
+    Popen(['paplay', './assets/sfx/collect.mp3'])
 
 def main() -> NoReturn:
-    Popen(['paplay', './sfx/start.mp3'])
+    Popen(['paplay', './assets/sfx/start.mp3'])
 
     capture: VideoCapture = cv2.VideoCapture(0)
     hands = mp_hands.Hands(max_num_hands=2)
