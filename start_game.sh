@@ -6,7 +6,7 @@
 TERM_FONT='SauceCodePro Nerd Font Mono'
 TERM_FONT_SIZE='10'
 OUT_TERM='xterm-mono'
-# TERM_FULLSCREEN='-fullscreen'
+TERM_FULLSCREEN='-fullscreen'
 xterm \
 	-bg black \
 	-fg white \
