@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
-import sys
 from time import sleep
 from typing import NoReturn
 
 from utils import *
 
-def start_game() -> int:
+def start_game() -> None:
     proc = Popen(['./start_game.sh'])
     proc.communicate()
-    return proc.returncode
 
 def main() -> NoReturn:
     show_matrix()

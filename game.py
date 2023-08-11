@@ -38,7 +38,7 @@ def get_42_img(
 
     return img
 
-img42_side_len = 70
+img42_side_len: int = 70
 img42: np.ndarray = get_42_img(
     "./assets/img/42.png",
     margin_top    = 100 + 20,
@@ -65,17 +65,17 @@ def add_directional_triangle(
     side_len: int,
     stretch: float,
 ) -> tuple[int, int]:
-    dir_vector = np.array([
+    dir_vector: np.ndarray = np.array([
         x1 - x2, y1 - y2
     ]).astype(np.float64)
 
     # normalize
     dir_vector /= np.linalg.norm(dir_vector)
 
-    triangle_height = side_len * (3**0.5) / 2
-    half_base = side_len / 2
+    triangle_height: float = side_len * (3**0.5) / 2
+    half_base: float = side_len / 2
 
-    perp_vector = np.array([-dir_vector[1], dir_vector[0]])
+    perp_vector: np.ndarray = np.array([-dir_vector[1], dir_vector[0]])
 
     apex_vertex = (int(x1 + dir_vector[0] * triangle_height * 2/3 * stretch), int(y1 + dir_vector[1] * triangle_height * 2/3 * stretch))
     left_vertex = (int(x1 - perp_vector[0] * half_base - dir_vector[0] * triangle_height/3), 
@@ -83,7 +83,7 @@ def add_directional_triangle(
     right_vertex = (int(x1 + perp_vector[0] * half_base - dir_vector[0] * triangle_height/3), 
        int(y1 + perp_vector[1] * half_base - dir_vector[1] * triangle_height/3))
 
-    triangle = np.array([apex_vertex, left_vertex, right_vertex])
+    triangle: np.ndarray = np.array([apex_vertex, left_vertex, right_vertex])
     cv2.drawContours(frame, [triangle], 0, rgb, -1)
 
     return apex_vertex
@@ -99,12 +99,14 @@ def main() -> int:
     start_sfx()
 
     capture: VideoCapture = cv2.VideoCapture(0)
-    hands = mp_hands.Hands(max_num_hands=2)
-    collected_42 = True
-    img42_x = -img42_side_len - 1
-    img42_y = -img42_side_len - 1
+    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=2)
+    collected_42: bool = True
+    img42_x: int = -img42_side_len - 1
+    img42_y: int = -img42_side_len - 1
+    no_fingers: int = 0
+    score: int = 0
 
-    i = 0
+    i: int = 0
     while True:
         success: bool
         frame: np.ndarray
@@ -123,7 +125,15 @@ def main() -> int:
                 img42_x : img42_x+img42_side_len,
             ] = img42
 
-        for positions in get_finger_positions(frame, hands, add_landmarks=True):
+        finger_positions = list(get_finger_positions(frame, hands, add_landmarks=True))
+        if finger_positions == []:
+            no_fingers += 1
+        else:
+            no_fingers = 0
+        if no_fingers > 70:
+            return score
+
+        for positions in finger_positions:
             index_knuckle_1_pos: tuple[int, int] = (-1, -1)
             for finger_id, finger_x, finger_y in positions:
                 if finger_id == FingerType.INDEX_KNUCKLE_2:
@@ -138,12 +148,19 @@ def main() -> int:
                         side_len=70,
                         stretch=2.0,
                     )
-                    if not collected_42 and touches_42(apex_x, apex_y, img42_x, img42_y):
+                    if not collected_42 and (
+                           touches_42(apex_x, apex_y,     img42_x, img42_y)
+                        or touches_42(finger_x, finger_y, img42_x, img42_y)
+                    ):
                         collected_42 = True
                         i = 0
+                        score += 42
                         collect_sfx()
         show_frame(frame, to_stdout=(not sys.stdout.isatty()))
         i += 1
 
 if __name__ == '__main__':
-    sys.exit(main())
+    score: int = main()
+    with open('./.score', 'w') as score_file:
+        score_file.write(str(score))
+    sys.exit(0)
