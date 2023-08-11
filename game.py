@@ -160,7 +160,5 @@ def main() -> int:
         i += 1
 
 if __name__ == '__main__':
-    score: int = main()
-    with open('./.score', 'w') as score_file:
-        score_file.write(str(score))
+    save_score(main())
     sys.exit(0)

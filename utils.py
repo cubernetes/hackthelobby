@@ -34,6 +34,9 @@ class FingerType(Enum):
     PINKY_KNUCKLE_2  = 19
     PINKY_TIP        = 20
 
+def save_score(score: int) -> None:
+    with open('./.score', 'w') as score_file:
+        score_file.write(str(score))
 
 def collect_sfx() -> None:
     Popen(['paplay', './assets/sfx/collect.mp3'])
