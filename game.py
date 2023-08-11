@@ -2,11 +2,9 @@
 
 import sys
 import random
-import psutil
 
 import numpy as np
 import cv2
-from cv2 import VideoCapture
 
 from utils import *
 
@@ -103,9 +101,8 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
 
 def main() -> int:
     music = start_game_sfx()
-    music_p = psutil.Process(pid=music.pid)
 
-    capture: VideoCapture = cv2.VideoCapture(0)
+    capture: cv2.VideoCapture = cv2.VideoCapture(0)
     hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=1)
     collected_42: bool = True
     noise_42img: int = 5
@@ -157,7 +154,6 @@ def main() -> int:
             music.kill()
             lost_sfx()
             return score
-            
 
         for positions in finger_positions:
             index_knuckle_1_pos: tuple[int, int] = (-1, -1)
@@ -182,9 +178,7 @@ def main() -> int:
                         i = 0
                         score += 42
                         if score == 4200 / 4: # that's 25 collects
-                            music_p.suspend()
                             initiate_rick()
-                            music_p.resume()
                         timer = 60 + (timer - 60) * .9
                         collect_sfx()
         show_frame(frame, to_stdout=(not sys.stdout.isatty()))
@@ -192,4 +186,3 @@ def main() -> int:
 
 if __name__ == '__main__':
     save_score(main())
-    sys.exit(0)
