@@ -75,7 +75,8 @@ def add_directional_triangle(
 
     # TODO: Fix type issue
     side_len *= norm / 15
-    stretch /= (norm/30)
+    # stretch /= (norm/30)
+
     triangle_height: float = side_len * (3**0.5) / 2
     half_base: float = side_len / 2
 
@@ -112,6 +113,8 @@ def main() -> int:
     score: int = 0
     finger_x: int = -1
     finger_y: int = -1
+    no_collect_ratio = 0
+    no_finger_ratio = 0
 
     i: int = 0
     while True:
@@ -136,15 +139,20 @@ def main() -> int:
                 img42_y + rand_noise_y : img42_y + img42_side_len + rand_noise_y,
                 img42_x + rand_noise_x : img42_x + img42_side_len + rand_noise_x,
             ] = img42
+            no_collect_ratio = min(i, 200) / 200
 
         finger_positions = list(get_finger_positions(frame, hands, add_landmarks=True))
         if finger_positions == []:
             no_fingers += 1
+            no_finger_ratio = min(no_fingers, 255) / 255
         else:
             no_fingers = 0
-        if no_fingers > 200:
+        if no_fingers > 255:
             music.kill()
             return score
+
+        ratio = max(no_finger_ratio, no_collect_ratio)
+        frame = cv2.addWeighted(frame, 1 - ratio, np.ones(frame.shape, dtype=frame.dtype), ratio, 0)
 
         for positions in finger_positions:
             index_knuckle_1_pos: tuple[int, int] = (-1, -1)

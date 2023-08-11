@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
+import os
 from time import sleep
 from typing import NoReturn
 
 from utils import *
+
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
 
 def start_game() -> None:
     proc = Popen(['./start_game.sh'])
