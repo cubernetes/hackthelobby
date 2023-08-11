@@ -15,8 +15,8 @@ def show_highscore() -> None:
         'display-popup',
         '-E',
         'watch',
-        '-tcn.5',
-        r"""sh -c 'for _ in $(seq $(($(tput lines) / 3 - 1))); do printf "\n\033[31m"; done; printf "%$(($(tput cols) / 2 + 5))s\n" "Highscore:"; figlet -w $(tput cols) -c $(cat "/home/tosuman/42/hackthelobby/.score"); printf "\n%$(($(tput cols) / 2 + 8))s\n" "Show your hands!";'""",
+        '-tcn.6',
+        r"""bash -c 'for _ in $(seq $(($(tput lines) / 3 - 1))); do printf "\n\033[31m"; done; printf "%$(($(tput cols) / 2 + 5))s\n" "Highscore:"; figlet -w $(tput cols) -c $(cat "/home/tosuman/42/hackthelobby/.score"); printf "\n\033[3$((RANDOM % 7 + 1))m%$(($(tput cols) / 2 + 4 + RANDOM % 8))s\n" "Show your hands!";'""",
     ])
 
 def main() -> NoReturn:

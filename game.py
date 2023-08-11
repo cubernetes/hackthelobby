@@ -70,8 +70,12 @@ def add_directional_triangle(
     ]).astype(np.float64)
 
     # normalize
-    dir_vector /= np.linalg.norm(dir_vector)
+    norm = np.linalg.norm(dir_vector)
+    dir_vector /= norm
 
+    # TODO: Fix type issue
+    side_len *= norm / 15
+    stretch /= (norm/30)
     triangle_height: float = side_len * (3**0.5) / 2
     half_base: float = side_len / 2
 
@@ -96,7 +100,7 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
         cv2.waitKey(1)
 
 def main() -> int:
-    start_game_sfx()
+    music = start_game_sfx()
 
     capture: VideoCapture = cv2.VideoCapture(0)
     hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=1)
@@ -106,6 +110,8 @@ def main() -> int:
     img42_y: int = -img42_side_len - 1 - noise_42img
     no_fingers: int = 0
     score: int = 0
+    finger_x: int = -1
+    finger_y: int = -1
 
     i: int = 0
     while True:
@@ -119,8 +125,11 @@ def main() -> int:
             if collected_42:
                 collected_42 = False
                 frame_height, frame_width = frame.shape[:2]
-                img42_x = random.randint(0, frame_width - img42_side_len - 1)
-                img42_y = random.randint(0, frame_height - img42_side_len - 1)
+                img42_x = random.randint(0, frame_width - img42_side_len - 1 - noise_42img)
+                img42_y = random.randint(0, frame_height - img42_side_len - 1 - noise_42img)
+                while ((finger_x - img42_x) ** 2 + (finger_y - img42_y) ** 2) ** .5 < 200:
+                    img42_x = random.randint(0, frame_width - img42_side_len - 1 - noise_42img)
+                    img42_y = random.randint(0, frame_height - img42_side_len - 1 - noise_42img)
             rand_noise_y = random.randint(0, noise_42img)
             rand_noise_x = random.randint(0, noise_42img)
             frame[
@@ -134,6 +143,7 @@ def main() -> int:
         else:
             no_fingers = 0
         if no_fingers > 200:
+            music.kill()
             return score
 
         for positions in finger_positions:
