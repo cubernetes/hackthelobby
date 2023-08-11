@@ -2,39 +2,12 @@
 
 import sys
 import random
-from time import sleep
-from enum import Enum
-from typing import NoReturn, Generator
-from types import ModuleType
-from subprocess import Popen
 
 import numpy as np
-import mediapipe as mp
 import cv2
 from cv2 import VideoCapture
 
-class FingerType(Enum):
-    BASE             = 0
-    BASE_RIGHT       = 1
-    THUMB_BASE       = 2
-    THUMB_KNUCKLE_1  = 3
-    THUMB_TIP        = 4
-    INDEX_BASE       = 5
-    INDEX_KNUCKLE_1  = 6
-    INDEX_KNUCKLE_2  = 7
-    INDEX_TIP        = 8
-    MIDDLE_BASE      = 9
-    MIDDLE_KNUCKLE_1 = 10
-    MIDDLE_KNUCKLE_2 = 11
-    MIDDLE_TIP       = 12
-    RING_BASE        = 13
-    RING_KNUCKLE_1   = 14
-    RING_KNUCKLE_2   = 15
-    RING_TIP         = 16
-    PINKY_BASE       = 17
-    PINKY_KNUCKLE_1  = 18
-    PINKY_KNUCKLE_2  = 19
-    PINKY_TIP        = 20
+from utils import *
 
 def get_42_img(
     img_path: str,
@@ -64,9 +37,6 @@ def get_42_img(
     img = cv2.resize(img, (img42_side_len, img42_side_len))
 
     return img
-
-mp_hands = mp.solutions.hands
-mp_draw: ModuleType = mp.solutions.drawing_utils
 
 img42_side_len = 70
 img42: np.ndarray = get_42_img(
@@ -118,27 +88,6 @@ def add_directional_triangle(
 
     return apex_vertex
 
-def get_finger_positions(
-    frame: np.ndarray,
-    hands: mp.solutions.hands.Hands,
-    add_landmarks: bool=False,
-) -> Generator[list[tuple[int, int, int]], None, None]:
-    height, width = frame.shape[:2]
-
-    img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    results = hands.process(img_rgb)
-
-    if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
-            positions = []
-            for id, lm in enumerate(hand_landmarks.landmark):
-                x = int(lm.x * width)
-                y = int(lm.y * height)
-                positions.append((FingerType(id), x, y))
-            yield positions
-            if add_landmarks:
-                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-
 def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
     if to_stdout:
         sys.stdout.buffer.write(frame.tobytes())
@@ -146,25 +95,7 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
         cv2.imshow("Image", frame)
         cv2.waitKey(1)
 
-def collect_sfx() -> None:
-    Popen(['paplay', './assets/sfx/collect.mp3'])
-
-def start_sfx() -> None:
-    Popen(['paplay', './assets/sfx/start.mp3'])
-
-def show_matrix(term_dev: str) -> None:
-    Popen(['sh', '-c', '2>/dev/null tmatrix 1>"' + term_dev + '"'])
-
-def found_hands() -> bool:
-    capture: VideoCapture = cv2.VideoCapture(0)
-    hands = mp_hands.Hands(max_num_hands=1)
-    success, frame = capture.read()
-    if not success:
-        return False
-
-    return list(get_finger_positions(frame, hands)) != []
-
-def game_loop() -> int:
+def main() -> int:
     start_sfx()
 
     capture: VideoCapture = cv2.VideoCapture(0)
@@ -214,15 +145,5 @@ def game_loop() -> int:
         show_frame(frame, to_stdout=(not sys.stdout.isatty()))
         i += 1
 
-def main() -> NoReturn:
-    if len(sys.argv) != 2:
-        print(f'Usage: {sys.argv[0]} TERMINAL_DEVICE')
-        sys.exit(1)
-    show_matrix(sys.argv[1])
-    while True:
-        if found_hands():
-            game_loop()
-        sleep(1)
-
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
