@@ -5,6 +5,7 @@ import random
 
 import numpy as np
 import cv2
+import requests
 
 from utils import *
 
@@ -99,6 +100,9 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
         cv2.imshow("Image", frame)
         cv2.waitKey(1)
 
+def green() -> None:
+    threading.Thread(target=requests.get, args=('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/5/connect')).start()
+
 def main() -> int:
     music = start_game_sfx()
 
@@ -182,6 +186,7 @@ def main() -> int:
                             initiate_rick()
                         timer = 60 + (timer - 60) * .9
                         collect_sfx()
+                        green()
         show_frame(frame, to_stdout=(not sys.stdout.isatty()))
         i += 1
 

@@ -6,10 +6,13 @@ from typing import Generator
 from types import ModuleType
 import threading
 
+import sounddevice as sd
+import soundfile as sf
+
 import numpy as np
 import mediapipe as mp
 import cv2
-from playsound import playsound
+# from playsound import playsound
 
 mp_hands = mp.solutions.hands
 mp_draw: ModuleType = mp.solutions.drawing_utils
@@ -41,23 +44,31 @@ def save_score(score: int) -> None:
     with open('./.score', 'w') as score_file:
         score_file.write(str(score))
 
+def play_audio(file_name: str) -> None:
+    # Read the audio file
+    data, samplerate = sf.read(file_name)
+    
+    # Play the audio file
+    sd.play(data, samplerate)
+    sd.wait()  # Wait for the audio playback to complete
+
 def start_game_sfx() -> None:
-    playsound('./assets/sound/start.mp3')
+    play_audio('./assets/sound/start.mp3')
     time.sleep(.5)
-    threading.Thread(target=playsound, args=('./assets/sound/background_music.mp3',), daemon=True).start()
+    threading.Thread(target=play_audio, args=('./assets/sound/background_music.mp3',), daemon=True).start()
 
 def collect_sfx() -> None:
     pass
-    threading.Thread(target=playsound, args=('./assets/sound/collect.mp3',), daemon=True).start()
+    # threading.Thread(target=play_audio, args=('./assets/sound/collect.mp3',), daemon=True).start()
 
 def lost_sfx() -> None:
-    playsound('./assets/sound/lost.mp3')
+    play_audio('./assets/sound/lost.mp3')
 
 def show_matrix() -> None:
     Popen(['tmatrix'])
 
 def initiate_rick() -> None:
-    threading.Thread(target=playsound, args=('./assets/sound/rick.mp3',), daemon=True).start()
+    # threading.Thread(target=play_audio, args=('./assets/sound/rick.mp3',), daemon=True).start()
     cap = cv2.VideoCapture('./assets/video/rick2.mp4')
     fps: int = int(cap.get(cv2.CAP_PROP_FPS))
     desired_delay: float = 1 / fps
