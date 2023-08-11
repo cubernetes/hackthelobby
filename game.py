@@ -2,6 +2,7 @@
 
 import sys
 import random
+import psutil
 
 import numpy as np
 import cv2
@@ -102,6 +103,7 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
 
 def main() -> int:
     music = start_game_sfx()
+    music_p = psutil.Process(pid=music.pid)
 
     capture: VideoCapture = cv2.VideoCapture(0)
     hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=1)
@@ -115,6 +117,7 @@ def main() -> int:
     finger_y: int = -1
     no_collect_ratio = 0
     no_finger_ratio = 0
+    timer = 100
 
     i: int = 0
     while True:
@@ -124,6 +127,8 @@ def main() -> int:
         if not success:
             continue
 
+        ratio = max(no_finger_ratio, no_collect_ratio)
+        frame = cv2.addWeighted(frame, 1 - ratio, np.ones(frame.shape, dtype=frame.dtype), ratio, 0)
         if i > 30:
             if collected_42:
                 collected_42 = False
@@ -139,7 +144,7 @@ def main() -> int:
                 img42_y + rand_noise_y : img42_y + img42_side_len + rand_noise_y,
                 img42_x + rand_noise_x : img42_x + img42_side_len + rand_noise_x,
             ] = img42
-            no_collect_ratio = min(i, 200) / 200
+            no_collect_ratio = min(i, timer) / timer
 
         finger_positions = list(get_finger_positions(frame, hands, add_landmarks=True))
         if finger_positions == []:
@@ -147,12 +152,12 @@ def main() -> int:
             no_finger_ratio = min(no_fingers, 255) / 255
         else:
             no_fingers = 0
-        if no_fingers > 255:
-            music.kill()
-            return score
 
-        ratio = max(no_finger_ratio, no_collect_ratio)
-        frame = cv2.addWeighted(frame, 1 - ratio, np.ones(frame.shape, dtype=frame.dtype), ratio, 0)
+        if ratio > 0.99:
+            music.kill()
+            lost_sfx()
+            return score
+            
 
         for positions in finger_positions:
             index_knuckle_1_pos: tuple[int, int] = (-1, -1)
@@ -176,6 +181,11 @@ def main() -> int:
                         collected_42 = True
                         i = 0
                         score += 42
+                        if score == 4200 / 4: # that's 25 collects
+                            music_p.suspend()
+                            initiate_rick()
+                            music_p.resume()
+                        timer = 60 + (timer - 60) * .9
                         collect_sfx()
         show_frame(frame, to_stdout=(not sys.stdout.isatty()))
         i += 1

@@ -15,6 +15,8 @@ def start_game() -> None:
     proc.communicate()
 
 def show_highscore() -> None:
+    with open('./.score', 'w') as f:
+        f.write('0')
     Popen([
         'tmux',
         'display-popup',
@@ -30,7 +32,7 @@ def main() -> NoReturn:
     while True:
         if found_hands():
             start_game()
-        sleep(1)
+        sleep(2)
 
 if __name__ == '__main__':
     main()

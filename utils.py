@@ -1,4 +1,5 @@
-from time import sleep
+import sys
+import time
 from enum import Enum
 from subprocess import Popen
 from typing import Generator
@@ -40,15 +41,36 @@ def save_score(score: int) -> None:
         score_file.write(str(score))
 
 def start_game_sfx() -> Popen:
-    Popen(['paplay', './assets/sfx/start.mp3']).communicate()
-    sleep(.5)
-    return Popen(['paplay', './assets/sfx/background_music.mp3'])
+    Popen(['paplay', './assets/sound/start.mp3']).communicate()
+    time.sleep(.5)
+    return Popen(['paplay', './assets/sound/background_music.mp3'])
 
 def collect_sfx() -> None:
-    Popen(['paplay', './assets/sfx/collect.mp3'])
+    Popen(['paplay', './assets/sound/collect.mp3'])
+
+def lost_sfx() -> None:
+    Popen(['paplay', './assets/sound/lost.mp3']).communicate()
 
 def show_matrix() -> None:
     Popen(['tmatrix'])
+
+def initiate_rick() -> None:
+    Popen(['paplay', './assets/sound/rick.mp3'])
+    cap = cv2.VideoCapture('./assets/video/rick2.mp4')
+    fps: int = int(cap.get(cv2.CAP_PROP_FPS))
+    desired_delay: float = 1 / fps
+
+    while True:
+        start_time = time.time()
+        ret, frame = cap.read()
+        if not ret:
+            break
+        sys.stdout.buffer.write(frame.tobytes())
+        elapsed_time = time.time() - start_time
+        remaining_delay = max(desired_delay - elapsed_time, 0)
+        time.sleep(remaining_delay)
+    cap.release()
+
 
 def found_hands() -> bool:
     capture: VideoCapture = cv2.VideoCapture(0)
