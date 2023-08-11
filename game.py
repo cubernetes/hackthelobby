@@ -3,6 +3,7 @@
 import sys
 import random
 
+from time import sleep
 import numpy as np
 import cv2
 import requests
@@ -100,14 +101,27 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
         cv2.imshow("Image", frame)
         cv2.waitKey(1)
 
+def collect_vfx() -> None:
+    requests.post('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/5/connect')
+    sleep(1)
+    requests.post('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/7/connect')
+
+def die_vfx() -> None:
+    requests.post('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/6/connect')
+    sleep(3)
+    requests.post('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/7/connect')
+
 def green() -> None:
-    threading.Thread(target=requests.get, args=('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/5/connect')).start()
+    threading.Thread(target=collect_vfx).start()
+
+def die() -> None:
+    threading.Thread(target=die_vfx).start()
 
 def main() -> int:
     music = start_game_sfx()
 
     capture: cv2.VideoCapture = cv2.VideoCapture(0)
-    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=2)
+    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=3)
     collected_42: bool = True
     noise_42img: int = 5
     img42_x: int = -img42_side_len - 1 - noise_42img
@@ -118,7 +132,7 @@ def main() -> int:
     finger_y: int = -1
     no_collect_ratio = 0
     no_finger_ratio = 0
-    timer = 1000
+    timer = 200
 
     i: int = 0
     while True:
@@ -156,8 +170,10 @@ def main() -> int:
             no_fingers = 0
 
         if ratio > 0.99:
-            music.kill()
+            if music:
+                music.kill()
             lost_sfx()
+            die()
             return score
 
         for positions in finger_positions:
