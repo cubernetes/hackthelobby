@@ -195,7 +195,7 @@ def main() -> NoReturn:
                         collected_42 = True
                         i = 0
                         collect_sfx()
-        show_frame(frame, to_stdout=True)
+        show_frame(frame, to_stdout=(not sys.stdout.isatty()))
         i += 1
 
 if __name__ == '__main__':
