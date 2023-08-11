@@ -1,3 +1,4 @@
+from time import sleep
 from enum import Enum
 from subprocess import Popen
 from typing import Generator
@@ -38,11 +39,12 @@ def save_score(score: int) -> None:
     with open('./.score', 'w') as score_file:
         score_file.write(str(score))
 
+def start_game_sfx() -> None:
+    Popen(['paplay', './assets/sfx/start.mp3'])
+    Popen(['paplay', './assets/sfx/background_music.mp3'])
+
 def collect_sfx() -> None:
     Popen(['paplay', './assets/sfx/collect.mp3'])
-
-def start_sfx() -> None:
-    Popen(['paplay', './assets/sfx/start.mp3'])
 
 def show_matrix() -> None:
     Popen(['tmatrix'])

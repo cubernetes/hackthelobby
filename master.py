@@ -16,7 +16,7 @@ def show_highscore() -> None:
         '-E',
         'watch',
         '-tcn.5',
-        r"""sh -c 'for _ in $(seq $(($(tput lines) / 3))); do printf "\n\033[31m"; done; figlet -w $(tput cols) -c $(cat "/home/tosuman/42/hackthelobby/.score")'""",
+        r"""sh -c 'for _ in $(seq $(($(tput lines) / 3 - 1))); do printf "\n\033[31m"; done; printf "%$(($(tput cols) / 2 + 5))s\n" "Highscore:"; figlet -w $(tput cols) -c $(cat "/home/tosuman/42/hackthelobby/.score"); printf "\n%$(($(tput cols) / 2 + 8))s\n" "Show your hands!";'""",
     ])
 
 def main() -> NoReturn:

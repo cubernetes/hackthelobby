@@ -38,7 +38,7 @@ def get_42_img(
 
     return img
 
-img42_side_len: int = 70
+img42_side_len: int = 100
 img42: np.ndarray = get_42_img(
     "./assets/img/42.png",
     margin_top    = 100 + 20,
@@ -96,13 +96,14 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
         cv2.waitKey(1)
 
 def main() -> int:
-    start_sfx()
+    start_game_sfx()
 
     capture: VideoCapture = cv2.VideoCapture(0)
-    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=2)
+    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=1)
     collected_42: bool = True
-    img42_x: int = -img42_side_len - 1
-    img42_y: int = -img42_side_len - 1
+    noise_42img: int = 5
+    img42_x: int = -img42_side_len - 1 - noise_42img
+    img42_y: int = -img42_side_len - 1 - noise_42img
     no_fingers: int = 0
     score: int = 0
 
@@ -120,9 +121,11 @@ def main() -> int:
                 frame_height, frame_width = frame.shape[:2]
                 img42_x = random.randint(0, frame_width - img42_side_len - 1)
                 img42_y = random.randint(0, frame_height - img42_side_len - 1)
+            rand_noise_y = random.randint(0, noise_42img)
+            rand_noise_x = random.randint(0, noise_42img)
             frame[
-                img42_y : img42_y+img42_side_len,
-                img42_x : img42_x+img42_side_len,
+                img42_y + rand_noise_y : img42_y + img42_side_len + rand_noise_y,
+                img42_x + rand_noise_x : img42_x + img42_side_len + rand_noise_x,
             ] = img42
 
         finger_positions = list(get_finger_positions(frame, hands, add_landmarks=True))
@@ -130,7 +133,7 @@ def main() -> int:
             no_fingers += 1
         else:
             no_fingers = 0
-        if no_fingers > 70:
+        if no_fingers > 200:
             return score
 
         for positions in finger_positions:
