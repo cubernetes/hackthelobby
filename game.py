@@ -121,7 +121,7 @@ def main() -> int:
     music = start_game_sfx()
 
     capture: cv2.VideoCapture = cv2.VideoCapture(0)
-    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=3)
+    hands: mp.solutions.hands.Hands = mp_hands.Hands(max_num_hands=1)
     collected_42: bool = True
     noise_42img: int = 5
     img42_x: int = -img42_side_len - 1 - noise_42img
