@@ -6,7 +6,7 @@
 TERM_FONT='SauceCodePro Nerd Font Mono'
 TERM_FONT_SIZE='10'
 OUT_TERM='xterm-mono'
-TERM_FULLSCREEN='-fullscreen'
+# TERM_FULLSCREEN='-fullscreen'
 xterm \
 	-bg black \
 	-fg white \
@@ -36,5 +36,5 @@ xterm \
 			--untimed \
 			--profile=low-latency \
 			- \
-		|| { echo "There was an error" 1>&2; read X; };
+		|| { echo "There was an error" 1>&2; read X; } && { echo "There was no error"; };
 	}'

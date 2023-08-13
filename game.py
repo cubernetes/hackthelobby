@@ -7,6 +7,7 @@ from time import sleep
 import numpy as np
 import cv2
 import requests
+from subprocess import Popen
 
 from utils import *
 
@@ -103,7 +104,7 @@ def show_frame(frame: np.ndarray, to_stdout: bool=False) -> None:
 
 def collect_vfx() -> None:
     requests.post('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/5/connect')
-    sleep(1)
+    sleep(2)
     requests.post('http://10.11.250.225:8080/api/v1/composition/layers/2/clips/7/connect')
 
 def die_vfx() -> None:
@@ -173,7 +174,9 @@ def main() -> int:
             if music:
                 music.kill()
             lost_sfx()
-            die()
+            # die()
+            capture.release()
+            cv2.destroyAllWindows()
             return score
 
         for positions in finger_positions:
@@ -191,10 +194,7 @@ def main() -> int:
                         side_len=70,
                         stretch=2.0,
                     )
-                    if not collected_42 and (
-                           touches_42(apex_x, apex_y,     img42_x, img42_y)
-                        or touches_42(finger_x, finger_y, img42_x, img42_y)
-                    ):
+                    if not collected_42 and touches_42(apex_x, apex_y, img42_x, img42_y):
                         collected_42 = True
                         i = 0
                         score += 42
@@ -203,6 +203,15 @@ def main() -> int:
                         timer = 60 + (timer - 60) * .9
                         collect_sfx()
                         green()
+                if not collected_42 and touches_42(finger_x, finger_y, img42_x, img42_y):
+                    collected_42 = True
+                    i = 0
+                    score += 42
+                    if score == 4200 / 4: # that's 25 collects
+                        initiate_rick()
+                    timer = 50 + (timer - 50) * .9
+                    collect_sfx()
+                    green()
         show_frame(frame, to_stdout=(not sys.stdout.isatty()))
         i += 1
 
